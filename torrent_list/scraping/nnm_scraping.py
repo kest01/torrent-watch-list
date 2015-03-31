@@ -1,6 +1,5 @@
 import logging
 import datetime
-import requests
 import bs4
 import re
 from datetime import date
@@ -12,6 +11,10 @@ class Movie:
 
 
 class Torrent:
+    pass
+
+
+class DynamicInfo:
     pass
 
 
@@ -30,7 +33,7 @@ def scrape_torrent(html_content, url):
     movie = Movie()
     torrent = Torrent()
     torrent.url = url
-    movie.torrents = [torrent]
+    movie.torrent = torrent
 
     soup = bs4.BeautifulSoup(html_content)
 
@@ -63,6 +66,8 @@ def scrape_torrent(html_content, url):
     torrent.translation = get_next_element(soup, ("Перевод:", "Перевод 1:"))
     torrent.torrent_url = soup.select("a[href^=download.php]")[0]['href']
     torrent.nnm_id = url.split('=')[-1]
+    torrent.seeders = get_seeders(soup)
+    torrent.leechers = get_leechers(soup)
 
     return movie
 
@@ -92,6 +97,22 @@ def get_imdb_id(soup):
             if digits.match(token):
                 return token
     return ''
+
+
+def get_seeders(soup):
+    seed_token = soup.select(".seed")
+    if len(seed_token) > 1:
+        for s in seed_token[1].text.split():
+            if s.isdigit():
+                return s
+
+
+def get_leechers(soup):
+    leech_token = soup.select(".leech")
+    if len(leech_token) > 1:
+        for s in leech_token[1].text.split():
+            if s.isdigit():
+                return s
 
 
 def get_next_element(soup, phrases):
@@ -172,17 +193,17 @@ def print_movie(movie):
     print("Movie:")
     pprint(movie.__dict__)
     print("\nTorrent:")
-    pprint(movie.torrents[0].__dict__)
+    pprint(movie.torrent.__dict__)
+
 
 if __name__ == "__main__":
 
     import nnm_hub
 
-    # URL = 'http://nnm-club.me/forum/viewtopic.php?t=852125'
-    URL = 'http://nnm-club.me/forum/viewtopic.php?t=882872'
+    URL = 'http://nnm-club.me/forum/viewtopic.php?t=852125'
+    # URL = 'http://nnm-club.me/forum/viewtopic.php?t=882872'
 
-    response = requests.get(URL, cookies=nnm_hub.cookies)
-    content = response.content.decode('windows-1251')
+    content = nnm_hub.get_html_content(URL)
     movie = scrape_torrent(content, URL)
 
     if movie:
