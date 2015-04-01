@@ -71,5 +71,6 @@ def login():
 # ---- TESTS -------------
 
 if __name__ == "__main__":
+    dao.init_db()
     scrap_hub('http://nnm-club.me/forum/viewforum.php?f=218')
 

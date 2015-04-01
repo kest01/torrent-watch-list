@@ -3,9 +3,11 @@ __author__ = 'KKharitonov'
 import pony.orm as pny
 import datetime, logging
 
+import torrent_list.orm.transform as transform
+
 logging.basicConfig(level=logging.INFO)
 
-clear_db_on_startup = True
+clear_db_on_startup = False
 sql_debug_flag = True
 
 db = pny.Database()
@@ -58,9 +60,9 @@ def save_movie(movie):
     db_movie = Movie.get_by_sql(query)
     if db_movie:
         logging.info("Movie already exist in DB. Add new torrent to movie")
-        db_movie.torrents.add(convert_torrent(movie.torrent))
+        db_movie.torrents.add(transform.torrent_sc_to_db(movie.torrent))
     else:
-        convert_movie(movie)
+        transform.movie_sc_to_db(movie)
 
 @pny.db_session
 def filter_exist_torrents(url_list):
@@ -68,43 +70,13 @@ def filter_exist_torrents(url_list):
     exist = pny.select(t.url for t in Torrent if t.nnm_id in ids)
     return url_list.difference(exist)
 
-def convert_torrent(t):
-    db_torrent = Torrent(nnm_id=t.nnm_id, title=t.title, torrent_url=t.torrent_url, url=t.url)
-    # if t.size:
-    db_torrent.size = t.size
-    # if t.translation:
-    db_torrent.translation = t.translation
-    db_torrent.seeders = t.seeders
-    db_torrent.leechers = t.leechers
+
+@pny.db_session
+def get_all_movies():
+    return transform.movie_db_to_json(Movie.select())
 
 
-    return db_torrent
-
-
-def convert_movie(m):
-
-    db_movie = Movie(description=m.description, full_name=m.full_name, name_rus=m.name_rus, found_date=m.found_date)
-    # if m.name_eng:
-    db_movie.name_eng = m.name_eng
-    # if m.actors:
-    db_movie.actors = m.actors
-    # if m.genre:
-    db_movie.genre = m.genre
-    # if m.imdb_id:
-    db_movie.imdb_id = m.imdb_id
-    # if m.kinopoisk_id:
-    db_movie.kinopoisk_id = m.kinopoisk_id
-    # if m.poster_url:
-    db_movie.poster_url = m.poster_url
-    # if m.year:
-    db_movie.year = m.year
-    db_movie.imdb_rating = m.imdb_rating
-
-    db_movie.torrents.add(convert_torrent(m.torrent))
-
-    return db_movie
-
-init_db()
+# init_db()
 
 if __name__ == "__main__":
     # @db_session
