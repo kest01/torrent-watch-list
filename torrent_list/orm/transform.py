@@ -34,7 +34,7 @@ def movie_sc_to_db(m):
     return db_movie
 
 
-def movie_db_to_json(movies):
+def movies_db_to_json(movies):
 
     def is_new(movie):
         return True
@@ -70,7 +70,22 @@ def movie_db_to_json(movies):
             'leechers': calc_leechers(m),
             'isNew': is_new(m),
             'favorites': False,
+            'torrents': torrents_db_to_json(m)
         }
         for m in movies
 
+    ]
+
+def torrents_db_to_json(movie):
+    return [
+        {
+            'title': t.title,
+            'size': t.size,
+            'translation': t.translation,
+            'url': t.url,
+            'seeders': t.seeders,
+            'leechers': t.leechers,
+            'torrentUrl': t.torrent_url
+        }
+        for t in movie.torrents
     ]

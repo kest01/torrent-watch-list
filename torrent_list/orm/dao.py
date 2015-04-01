@@ -1,9 +1,11 @@
 __author__ = 'KKharitonov'
 
-import pony.orm as pny
-import datetime, logging
+import datetime
+import logging
 
+import pony.orm as pny
 import torrent_list.orm.transform as transform
+
 
 logging.basicConfig(level=logging.INFO)
 
@@ -40,6 +42,7 @@ class Movie(db.Entity):
     imdb_rating = pny.Optional(float)
     torrents = pny.Set(Torrent)
 
+
 def init_db():
     if sql_debug_flag:
         pny.sql_debug(True)
@@ -49,6 +52,7 @@ def init_db():
     if clear_db_on_startup:
         db.drop_all_tables(with_all_data=True)
         db.create_tables()
+
 
 @pny.db_session
 def save_movie(movie):
@@ -64,6 +68,7 @@ def save_movie(movie):
     else:
         transform.movie_sc_to_db(movie)
 
+
 @pny.db_session
 def filter_exist_torrents(url_list):
     ids = {url.split('=')[-1] for url in url_list}
@@ -73,18 +78,18 @@ def filter_exist_torrents(url_list):
 
 @pny.db_session
 def get_all_movies():
-    return transform.movie_db_to_json(Movie.select())
+    return transform.movies_db_to_json(Movie.select())
 
 
 # init_db()
 
 if __name__ == "__main__":
     # @db_session
-    def testDB():
+    def test_db():
         # UserSettings(name='UserName', email='test email')
         # UserSettings(name='UserName2', email='email')
         print("ready to commit")
 
     init_db()
 
-    testDB()
+    test_db()
