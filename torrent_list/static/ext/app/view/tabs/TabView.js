@@ -47,19 +47,24 @@ Ext.define('TorrentWatchList.view.tabs.TabView', {
                     if (hub.new) s = ' <b> +' + hub.new + '</b>';
                     tabs.add({
                         title: hub.description + s,
-                        html : hub.id + ' : ' + hub.description,
-                        focusable: false
+                        items: [{
+                            xtype: 'container',
+                            items: [{
+                                xtype: 'torrent-table-view',
+                                hub_id: hub.id
+                            }]
+                        }]
                     });
-                }
+                };
                 if (Array.isArray(hubs)) {
                     if (hubs.length > 1) {
                         tabs.add({
                             title: 'Все хабы',
                             items: [ {
                                 xtype: 'container',
-                                //layout: 'fit',
                                 items: [{
-                                    xtype: 'torrent-table-view'
+                                    xtype: 'torrent-table-view',
+                                    hub_id: 0
                                 }]
                             }]
                         });
