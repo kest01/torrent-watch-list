@@ -76,3 +76,13 @@
     width: 48px;
     cursor: pointer;
 }
+
+.x-tab-default-top.x-tab-focus.x-tab-active {
+
+    -webkit-box-shadow: #C7D3E0 0 1px 0px 0 inset, #C7D3E0 0 -1px 0px 0 inset, #C7D3E0 -1px 0 0px 0 inset, #C7D3E0 1px 0 0px 0 inset;
+
+    -moz-box-shadow: #C7D3E0 0 1px 0px 0 inset, #C7D3E0 0 -1px 0px 0 inset, #C7D3E0 -1px 0 0px 0 inset, #C7D3E0 1px 0 0px 0 inset;
+
+    box-shadow: #C7D3E0 0 1px 0px 0 inset, #C7D3E0 0 -1px 0px 0 inset, #C7D3E0 -1px 0 0px 0 inset, #C7D3E0 1px 0 0px 0 inset;
+
+}

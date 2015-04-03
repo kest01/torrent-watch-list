@@ -12,7 +12,7 @@ var movieStore;
 
 
 
-Ext.define('TorrentWatchList.view.main.TableView', {
+Ext.define('TorrentWatchList.view.tabs.TableView', {
     extend: 'Ext.grid.Panel',
     requires: [
         'TorrentWatchList.store.MovieStore',
@@ -22,17 +22,16 @@ Ext.define('TorrentWatchList.view.main.TableView', {
     xtype: 'torrent-table-view',
     store: 'TorrentWatchList.store.MovieStore',
     collapsible: false,
-    height: 350,
-//    width: 1050,
-    title: 'Torrents list',
-//    bufferedRenderer: false,
+    //width: '99%',
+    //layout: 'fit',
+
     viewConfig: {
         stripeRows: true,
         enableTextSelection: true,
         markDirty: false
     },
     trackMouseOver: true,
-    tools:[
+/*    tools:[
         {
             type:'refresh',
             tooltip: 'Sync',
@@ -74,7 +73,7 @@ Ext.define('TorrentWatchList.view.main.TableView', {
                 console.log(idsToSkip);
 
             }
-        }],
+        }],*/
     initComponent: function () {
         var me = this;
 

@@ -1,7 +1,7 @@
 /**
  * Created by Konstantin on 03.04.2015.
  */
-Ext.define('TorrentWatchList.view.main.TabController', {
+Ext.define('TorrentWatchList.view.tabs.TabController', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.tab-view',
 

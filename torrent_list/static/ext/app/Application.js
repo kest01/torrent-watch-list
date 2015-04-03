@@ -3,6 +3,8 @@
  * Ext.application(). This is the ideal place to handle application launch and initialization
  * details.
  */
+//var tabMask;
+
 Ext.define('TorrentWatchList.Application', {
     extend: 'Ext.app.Application',
     
@@ -10,11 +12,20 @@ Ext.define('TorrentWatchList.Application', {
 
     stores: [
         'TorrentWatchList.store.MovieStore'
-        // TODO: add global / shared stores here
     ],
     
     launch: function () {
         Ext.tip.QuickTipManager.init();
-        // TODO - Launch the application
+
     }
 });
+
+function showError(message) {
+        console.error("Error message: ", message);
+        Ext.MessageBox.show({
+            title: 'Error!',
+            msg: "Please see application log for detail.",
+            cls: 'sm-alert-dialog',
+            buttons: Ext.MessageBox.OK
+        });
+    };

@@ -9,9 +9,10 @@ Ext.define('TorrentWatchList.view.main.Main', {
     extend: 'Ext.container.Container',
     requires: [
         'TorrentWatchList.store.MovieStore',
-        'TorrentWatchList.view.main.TableView',
         'TorrentWatchList.view.main.MainController',
-        'TorrentWatchList.view.main.MainModel'
+        'TorrentWatchList.view.main.MainModel',
+        'TorrentWatchList.view.tabs.TabView',
+        'TorrentWatchList.view.tabs.TabController'
     ],
 
     xtype: 'app-main',
@@ -25,8 +26,12 @@ Ext.define('TorrentWatchList.view.main.Main', {
         type: 'fit'
     },
 
-    items: [{
+/*    items: [{
         xtype: "torrent-table-view",
         padding: "20 40 20 40"
+    }]*/
+    items: [{
+        xtype: "main-tabs",
+        padding: "20 20 20 20"
     }]
 });

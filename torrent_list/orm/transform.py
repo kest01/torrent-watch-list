@@ -88,6 +88,17 @@ def torrents_db_to_json(movie):
     ]
 
 
+def hubs_db_to_json(hubs):
+    return [
+        {
+            'id': h.id,
+            'description': h.description,
+            'new': h.id - 1,
+        }
+        for h in hubs
+    ]
+
+
 def copy_attr(source, dest, attr):
     if isinstance(attr, (list, tuple)):
         for a in attr:

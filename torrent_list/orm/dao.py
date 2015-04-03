@@ -87,8 +87,13 @@ def filter_exist_torrents(url_list):
 
 
 @pny.db_session
-def get_all_movies():
-    return transform.movies_db_to_json(Movie.select())
+def get_all_movies(hub_id):
+    if hub_id:
+        movies = pny.select(m for m in Movie for t in m.torrents if t.hub.id == hub_id)
+    else:
+        movies = Movie.select()
+
+    return transform.movies_db_to_json(movies)
 
 
 @pny.db_session
@@ -105,7 +110,8 @@ def get_hubs():
     hubs = Hub.select()
     return hubs[:]
 
-
+def get_habs_and_new():
+    return transform.hubs_db_to_json(get_hubs())
 
 if __name__ == "__main__":
     # @db_session
