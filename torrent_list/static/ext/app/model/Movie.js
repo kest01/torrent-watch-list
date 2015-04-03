@@ -10,7 +10,8 @@ Ext.define('TorrentWatchList.model.Movie', {
         {name: 'seeders', type: 'int'},
         {name: 'leechers', type: 'int'},
         {name: 'imdbId', type: 'string'},
-        {name: 'imdbRating', type: 'float'},
+        {name: 'kinopoiskId', type: 'string'},
+        {name: 'rating', type: 'float'},
         {name: 'isNew', type: 'boolean'},
         {name: 'isReadyToDel', type: 'boolean', persist: false, convert: function(value, record) {
             var result = false;

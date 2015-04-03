@@ -27,6 +27,6 @@ Ext.define('TorrentWatchList.view.main.Main', {
 
     items: [{
         xtype: "torrent-table-view",
-        padding: "20 100 20 100"
+        padding: "20 40 20 40"
     }]
 });

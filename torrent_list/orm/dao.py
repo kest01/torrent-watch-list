@@ -20,6 +20,7 @@ class Torrent(db.Entity):
     title = pny.Required(str)
     torrent_url = pny.Required(str, unique=True)
     url = pny.Required(str, unique=True)
+    hub = pny.Required('Hub')
     movie = pny.Optional(lambda: Movie)
     size = pny.Optional(str)
     seeders = pny.Optional(int)
@@ -36,10 +37,18 @@ class Movie(db.Entity):
     actors = pny.Optional(str)
     genre = pny.Optional(str)
     imdb_id = pny.Optional(str)
+    imdb_rating = pny.Optional(float)
     kinopoisk_id = pny.Optional(str)
+    kinopoisk_rating = pny.Optional(str)
     poster_url = pny.Optional(str)
     year = pny.Optional(str)
-    imdb_rating = pny.Optional(float)
+    torrents = pny.Set(Torrent)
+
+
+class Hub(db.Entity):
+    url = pny.Required(str)
+    module = pny.Required(str)
+    description = pny.Optional(str)
     torrents = pny.Set(Torrent)
 
 
@@ -52,10 +61,11 @@ def init_db():
     if clear_db_on_startup:
         db.drop_all_tables(with_all_data=True)
         db.create_tables()
+        init_hubs()
 
 
 @pny.db_session
-def save_movie(movie):
+def save_movie(hub_id, movie):
     query = "SELECT * FROM Movie WHERE full_name = $movie.full_name"
     if movie.imdb_id:
         query += " OR imdb_id = $movie.imdb_id"
@@ -64,9 +74,9 @@ def save_movie(movie):
     db_movie = Movie.get_by_sql(query)
     if db_movie:
         logging.info("Movie already exist in DB. Add new torrent to movie")
-        db_movie.torrents.add(transform.torrent_sc_to_db(movie.torrent))
+        db_movie.torrents.add(transform.torrent_sc_to_db(movie.torrent, hub_id))
     else:
-        transform.movie_sc_to_db(movie)
+        transform.movie_sc_to_db(movie, hub_id)
 
 
 @pny.db_session
@@ -81,15 +91,29 @@ def get_all_movies():
     return transform.movies_db_to_json(Movie.select())
 
 
-# init_db()
+@pny.db_session
+def init_hubs():
+    Hub(url='http://nnm-club.me/forum/viewforum.php?f=218', module='nnm_scraping', description='NNM: Зарубежные новинки DVDRip')
+    Hub(url='http://nnm-club.me/forum/viewforum.php?f=270', module='nnm_scraping', description='NNM: Отечественные новинки DVDRip')
+    Hub(url='http://nnm-club.me/forum/viewforum.php?f=888', module='nnm_scraping', description='NNM: Новинки (3D)')
+    Hub(url='http://nnm-club.me/forum/viewforum.php?f=954', module='nnm_scraping', description='NNM: Новинки (HD)')
+    Hub(url='http://nnm-club.me/forum/viewforum.php?f=217', module='nnm_scraping', description='NNM: Экранки')
+
+
+@pny.db_session
+def get_hubs():
+    hubs = Hub.select()
+    return hubs[:]
+
+
 
 if __name__ == "__main__":
     # @db_session
-    def test_db():
-        # UserSettings(name='UserName', email='test email')
-        # UserSettings(name='UserName2', email='email')
-        print("ready to commit")
+    def add_hub():
+        pass
+
+    clear_db_on_startup = True
 
     init_db()
 
-    test_db()
+    add_hub()

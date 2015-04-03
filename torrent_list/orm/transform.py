@@ -1,37 +1,28 @@
 __author__ = 'Konstantin'
 
-# from .dao import Movie as DbMovie
-# from .dao import Torrent as DbTorrent
-#
 # from torrent_list.scraping.nnm_scraping import Movie as ScMovie
 # from torrent_list.scraping.nnm_scraping import Torrent as ScTorrent
 
 
-def torrent_sc_to_db(t):
-    db_torrent = Torrent(nnm_id=t.nnm_id, title=t.title, torrent_url=t.torrent_url, url=t.url)
-    db_torrent.size = t.size
-    db_torrent.translation = t.translation
-    db_torrent.seeders = t.seeders
-    db_torrent.leechers = t.leechers
+def torrent_sc_to_db(t, hub_id):
+    from .dao import Torrent
+
+    db_torrent = Torrent(nnm_id=t.nnm_id, title=t.title, torrent_url=t.torrent_url, url=t.url, hub=hub_id)
+    copy_attr(t, db_torrent, ('size', 'translation', 'seeders', 'leechers'))
 
     return db_torrent
 
 
-def movie_sc_to_db(m):
+def movie_sc_to_db(m, hub_id):
+    from .dao import Movie
 
     db_movie = Movie(description=m.description, full_name=m.full_name, name_rus=m.name_rus, found_date=m.found_date)
-    db_movie.name_eng = m.name_eng
-    db_movie.actors = m.actors
-    db_movie.genre = m.genre
-    db_movie.imdb_id = m.imdb_id
-    db_movie.kinopoisk_id = m.kinopoisk_id
-    db_movie.poster_url = m.poster_url
-    db_movie.year = m.year
-    db_movie.imdb_rating = m.imdb_rating
+    copy_attr(m, db_movie, ('name_eng', 'actors', 'genre', 'imdb_id', 'kinopoisk_id', 'poster_url', 'year', 'imdb_rating', 'kinopoisk_rating'))
 
-    db_movie.torrents.add(torrent_sc_to_db(m.torrent))
+    db_movie.torrents.add(torrent_sc_to_db(m.torrent, hub_id))
 
     return db_movie
+
 
 
 def movies_db_to_json(movies):
@@ -54,6 +45,9 @@ def movies_db_to_json(movies):
     def calc_leechers(movie):
         return sum([t.leechers for t in movie.torrents])
 
+    def get_rating(movie):
+        return movie.imdb_rating if movie.imdb_rating else movie.kinopoisk_rating
+
     return [
         {
             'id': m.id,
@@ -63,7 +57,8 @@ def movies_db_to_json(movies):
             'description': m.description,
             'actors': m.actors,
             'imdbId': m.imdb_id,
-            'imdbRating': m.imdb_rating,
+            'kinopoiskId': m.kinopoisk_id,
+            'rating': get_rating(m),
             'posterUrl': m.poster_url,
             'translation': movie_translation(m),
             'seeders': calc_seeders(m),
@@ -76,6 +71,7 @@ def movies_db_to_json(movies):
 
     ]
 
+
 def torrents_db_to_json(movie):
     return [
         {
@@ -85,7 +81,18 @@ def torrents_db_to_json(movie):
             'url': t.url,
             'seeders': t.seeders,
             'leechers': t.leechers,
-            'torrentUrl': t.torrent_url
+            'torrentUrl': t.torrent_url,
+            'hub': t.hub.description
         }
         for t in movie.torrents
     ]
+
+
+def copy_attr(source, dest, attr):
+    if isinstance(attr, (list, tuple)):
+        for a in attr:
+            copy_attr(source, dest, a)
+    else:
+        val = getattr(source, attr)
+        if val is not None:
+            setattr(dest, attr, val)

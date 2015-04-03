@@ -23,7 +23,7 @@ Ext.define('TorrentWatchList.view.main.TableView', {
     store: 'TorrentWatchList.store.MovieStore',
     collapsible: false,
     height: 350,
-    width: 1050,
+//    width: 1050,
     title: 'Torrents list',
 //    bufferedRenderer: false,
     viewConfig: {
@@ -97,7 +97,6 @@ Ext.define('TorrentWatchList.view.main.TableView', {
         },{
             xtype: 'gridcolumn',
             dataIndex : 'posterUrl',
-            text : 'Poster',
             sortable : false,
             align: 'center',
             width: 120,
@@ -107,19 +106,33 @@ Ext.define('TorrentWatchList.view.main.TableView', {
             }
 
         }, {
-            text: 'Description',
+            text: 'Описание',
                 flex: 1,
 //            width: auto,
             cellWrap: true,
             dataIndex: 'nameFull',
             sortable : false,
             renderer: function(val, meta, record) {
-                return '<b>Название</b>: ' + val + '<br/>'
-                    + "<b>Год выпуска</b>: " + record.raw.year + "<br/>"
-                    + "<b>Жанр</b>: " + record.raw.genre + "<br/>"
-                    + "<b>Перевод</b>: " + record.raw.translation + "<br/>"
-                    + "<b>Описание</b>: " + record.raw.description + "<br/>"
-                    + "<b>Актеры</b>: " + record.raw.actors;
+
+                var hubArr = []
+                record.torrents().data.each(function(item, index, totalItems) {
+                    hub = item.data['hub'];
+                    if (hubArr.indexOf(hub) == -1)
+                        hubArr.push(hub)
+                });
+                var hubs = '';
+                hubArr.forEach(function(hub) {
+                    if (!hubs) hubs = hub;
+                    else hubs += ', ' + hub;
+                });
+
+                return '<b>Хабы</b>: ' + hubs
+                    + '<br/><b>Название</b>: ' + val
+                    + "<br/><b>Год выпуска</b>: " + record.raw.year
+                    + "<br/><b>Жанр</b>: " + record.raw.genre
+                    + "<br/><b>Перевод</b>: " + record.raw.translation
+                    + "<br/><b>Описание</b>: " + record.raw.description
+                    + "<br/><b>Актеры</b>: " + record.raw.actors;
             }
         }, {
             text: 'S',
@@ -134,13 +147,18 @@ Ext.define('TorrentWatchList.view.main.TableView', {
             align: 'center',
             dataIndex: 'leechers'
         }, {
-            text: 'IMDB',
+            text: 'Рейтинг',
             width: 120,
             tdCls: "vertical-align-class",
             align: 'center',
-            dataIndex: 'imdbRating',
+            dataIndex: 'rating',
             renderer: function(val, meta, record) {
-                return '<a href="http://www.imdb.com/title/' + record.raw.imdbId + '/" target="_blank" rel="nofollow"><img src="http://imdb.snick.ru/ratefor/02/' + record.raw.imdbId +  '.png"/></a>';
+                if (record.raw.imdbId){
+                    return '<a href="http://www.imdb.com/title/' + record.raw.imdbId + '/" target="_blank" rel="nofollow"><img src="http://imdb.snick.ru/ratefor/02/' + record.raw.imdbId +  '.png"/></a>';
+                } else if (record.raw.kinopoiskId) {
+                    return '<a href="http://www.kinopoisk.ru/film/' + record.raw.kinopoiskId + '/" target="_blank" rel="nofollow"><img src="http://www.kinopoisk.ru/rating/' + record.raw.kinopoiskId + '.gif"/></a>';
+                }
+                return ''
             }
         }, {
             xtype: 'actioncolumn',
@@ -179,7 +197,7 @@ Ext.define('TorrentWatchList.view.main.TableView', {
                     var win = Ext.create('Ext.window.Window', {
                         title: 'Hello',
                         height: height,
-                        width: 1000,
+                        width: 1200,
                         modal: true,
                         layout: 'fit',
                         items: {
@@ -187,6 +205,13 @@ Ext.define('TorrentWatchList.view.main.TableView', {
                             border: false,
                             columns: [
                                 {
+                                    text: 'Хаб',
+                                    flex: 1,
+                                    cellWrap: true,
+                                    dataIndex: 'hub',
+                                    menuDisabled: true,
+                                    sortable : true
+                                }, {
                                     text: 'Title',
                                     flex: 1,
                                     cellWrap: true,
@@ -197,14 +222,14 @@ Ext.define('TorrentWatchList.view.main.TableView', {
                                         return '<a href="' + record.get("url") + '" target="_blank">' + record.get("title") + '</a>';
                                     }
                                 }, {
-                                    text: 'Translation',
+                                    text: 'Перевод',
                                     flex: 1,
                                     cellWrap: true,
                                     dataIndex: 'translation',
                                     menuDisabled: true,
                                     sortable : true
                                 }, {
-                                    text: 'Size',
+                                    text: 'Размер',
                                     width: 70,
                                     cellWrap: true,
                                     dataIndex: 'size',
@@ -212,7 +237,7 @@ Ext.define('TorrentWatchList.view.main.TableView', {
                                     tdCls: "vertical-align-class",
                                     sortable : true
                                 }, {
-                                    text: 'Seeders',
+                                    text: 'S',
                                     width: 60,
                                     dataIndex: 'seeders',
                                     align: 'center',
@@ -220,7 +245,7 @@ Ext.define('TorrentWatchList.view.main.TableView', {
                                     menuDisabled: true,
                                     sortable : true
                                 }, {
-                                    text: 'Leechers',
+                                    text: 'L',
                                     width: 60,
                                     align: 'center',
                                     tdCls: "vertical-align-class",

@@ -3,23 +3,53 @@ import datetime
 import bs4
 import re
 from datetime import date
-
-logging.basicConfig(level=logging.DEBUG)
-
-class Movie:
-    pass
+import requests
+import torrent_list.utils as utils
+from torrent_list.scraping.hub import Movie, Torrent, ParsingException
 
 
-class Torrent:
-    pass
+cookies = {}
+#cookies = {'phpbb2mysql_4_sid': '8f45db04b03764d002e8fdceb1444242', 'phpbb2mysql_4_data': 'a%3A2%3A%7Bs%3A11%3A%22autologinid%22%3Bs%3A0%3A%22%22%3Bs%3A6%3A%22userid%22%3Bs%3A6%3A%22283613%22%3B%7D'}
+LOGIN_URL = 'http://nnm-club.me/forum/login.php'
+IMDB_API_URL = "http://www.omdbapi.com/?plot=short&r=json&i="
+ENCODING = 'windows-1251'
+
+logging.basicConfig(level=logging.INFO)
+
+def scrap(url):
+    content = get_html_content(url)
+    return scrape(content, url)
 
 
-class DynamicInfo:
-    pass
+def get_hub_links(url):
+    content = get_html_content(url)
+    # logging.info(content)
+    soup = bs4.BeautifulSoup(content)
+
+    url_base, _ = utils.split_url(url)
+
+    urls = {url_base + a.attrs.get('href') for a in soup.select(".topictitle a[href^=viewtopic.php]")}
+
+    logging.info(urls)
+    return urls
 
 
-class ParsingException(Exception):
-    pass
+def get_html_content(url):
+    if not cookies:
+        login()
+    response = requests.get(url, cookies=cookies)
+
+    return response.content.decode(ENCODING)
+
+
+def login():
+    login_info = {'username': 'kest01', 'password': '1q2w3e', 'autologin': 'checked', 'login': 'Вход'}
+    rq = requests.post(LOGIN_URL, data=login_info, allow_redirects=False)
+    global cookies
+    cookies = requests.utils.dict_from_cookiejar(rq.cookies)
+    logging.info(cookies)
+
+
 
 def scrape(html_content, url):
     try:
@@ -42,7 +72,7 @@ def scrape_torrent(html_content, url):
         return None
 
     title = soup.find(class_='maintitle').text
-    validate(title, "Can't parse title of url %s" % url);
+    validate(title, "Can't parse title of url %s" % url)
     full_name, year = parse_title(title)
     name_rus, name_eng = get_names(full_name)
 
@@ -64,7 +94,8 @@ def scrape_torrent(html_content, url):
 
     torrent.size = get_size(soup)
     torrent.translation = get_next_element(soup, ("Перевод:", "Перевод 1:"))
-    torrent.torrent_url = soup.select("a[href^=download.php]")[0]['href']
+    url_base, _ = utils.split_url(url)
+    torrent.torrent_url = url_base + soup.select("a[href^=download.php]")[0]['href']
     torrent.nnm_id = url.split('=')[-1]
     torrent.seeders = get_seeders(soup)
     torrent.leechers = get_leechers(soup)
@@ -105,6 +136,7 @@ def get_seeders(soup):
         for s in seed_token[1].text.split():
             if s.isdigit():
                 return s
+    return 0
 
 
 def get_leechers(soup):
@@ -113,7 +145,7 @@ def get_leechers(soup):
         for s in leech_token[1].text.split():
             if s.isdigit():
                 return s
-
+    return 0
 
 def get_next_element(soup, phrases):
     result = find_phrase(soup, phrases)
@@ -198,12 +230,12 @@ def print_movie(movie):
 
 if __name__ == "__main__":
 
-    import nnm_hub
 
-    URL = 'http://nnm-club.me/forum/viewtopic.php?t=852125'
+    URL = 'http://nnm-club.me/forum/viewtopic.php?t=877961'
+    # URL = 'http://nnm-club.me/forum/viewtopic.php?t=852125'
     # URL = 'http://nnm-club.me/forum/viewtopic.php?t=882872'
 
-    content = nnm_hub.get_html_content(URL)
+    content = get_html_content(URL)
     movie = scrape_torrent(content, URL)
 
     if movie:
