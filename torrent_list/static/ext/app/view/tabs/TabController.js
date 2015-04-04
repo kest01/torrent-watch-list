@@ -7,8 +7,13 @@ Ext.define('TorrentWatchList.view.tabs.TabController', {
 
     onTabChange: function(tabs, newTab, oldTab) {
         Ext.suspendLayouts();
-        newTab.setTitle('Active Tab');
-        oldTab.setTitle('Inactive Tab');
+        console.log('chenge tab to ' + newTab.title);
+        var grid = newTab.items.getAt(0).items.getAt(0);
+        var store = grid.store
+
+        store.load({ params: { hubid: grid.hub_id} });
+        grid.getView().refresh();
+
         Ext.resumeLayouts(true);
     }
 });

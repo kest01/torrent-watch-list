@@ -11,7 +11,6 @@ from torrent_list.scraping.hub import Movie, Torrent, ParsingException
 cookies = {}
 #cookies = {'phpbb2mysql_4_sid': '8f45db04b03764d002e8fdceb1444242', 'phpbb2mysql_4_data': 'a%3A2%3A%7Bs%3A11%3A%22autologinid%22%3Bs%3A0%3A%22%22%3Bs%3A6%3A%22userid%22%3Bs%3A6%3A%22283613%22%3B%7D'}
 LOGIN_URL = 'http://nnm-club.me/forum/login.php'
-IMDB_API_URL = "http://www.omdbapi.com/?plot=short&r=json&i="
 ENCODING = 'windows-1251'
 
 logging.basicConfig(level=logging.INFO)

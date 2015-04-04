@@ -11,21 +11,24 @@ logging.basicConfig(level=logging.INFO)
 
 clear_db_on_startup = False
 sql_debug_flag = True
+user = None
 
 db = pny.Database()
 
 
-class Torrent(db.Entity):
-    nnm_id = pny.PrimaryKey(int, size=32)
-    title = pny.Required(str)
-    torrent_url = pny.Required(str, unique=True)
-    url = pny.Required(str, unique=True)
-    hub = pny.Required('Hub')
-    movie = pny.Optional(lambda: Movie)
-    size = pny.Optional(str)
-    seeders = pny.Optional(int)
-    leechers = pny.Optional(int)
-    translation = pny.Optional(str)
+class User(db.Entity):
+    name = pny.Required(str)
+    email = pny.Required(str)
+    hubs = pny.Set('Hub')
+    torrents = pny.Set('Torrent', lazy=True)
+
+
+class Hub(db.Entity):
+    url = pny.Required(str)
+    module = pny.Required(str)
+    description = pny.Optional(str)
+    torrents = pny.Set('Torrent')
+    users = pny.Set(User)
 
 
 class Movie(db.Entity):
@@ -42,14 +45,21 @@ class Movie(db.Entity):
     kinopoisk_rating = pny.Optional(str)
     poster_url = pny.Optional(str)
     year = pny.Optional(str)
-    torrents = pny.Set(Torrent)
+    torrents = pny.Set('Torrent')
 
 
-class Hub(db.Entity):
-    url = pny.Required(str)
-    module = pny.Required(str)
-    description = pny.Optional(str)
-    torrents = pny.Set(Torrent)
+class Torrent(db.Entity):
+    nnm_id = pny.PrimaryKey(int, size=32)
+    title = pny.Required(str)
+    torrent_url = pny.Required(str, unique=True)
+    url = pny.Required(str, unique=True)
+    hub = pny.Required('Hub')
+    movie = pny.Optional(lambda: Movie)
+    size = pny.Optional(str)
+    seeders = pny.Optional(int)
+    leechers = pny.Optional(int)
+    translation = pny.Optional(str)
+    users = pny.Set(User)
 
 
 def init_db():
@@ -61,7 +71,7 @@ def init_db():
     if clear_db_on_startup:
         db.drop_all_tables(with_all_data=True)
         db.create_tables()
-        init_hubs()
+        init_data()
 
 
 @pny.db_session
@@ -74,9 +84,16 @@ def save_movie(hub_id, movie):
     db_movie = Movie.get_by_sql(query)
     if db_movie:
         logging.info("Movie already exist in DB. Add new torrent to movie")
-        db_movie.torrents.add(transform.torrent_sc_to_db(movie.torrent, hub_id))
+        db_torrent = transform.torrent_sc_to_db(movie.torrent, hub_id)
+        db_movie.torrents.add(db_torrent)
     else:
-        transform.movie_sc_to_db(movie, hub_id)
+        db_movie, db_torrent = transform.movie_sc_to_db(movie, hub_id)
+    add_torrent_to_user(db_torrent)
+
+
+def add_torrent_to_user(db_torrent):
+    for u in pny.select(u for u in User for hub in u.hubs if db_torrent.hub == hub):
+        u.torrents.add(db_torrent)
 
 
 @pny.db_session
@@ -97,12 +114,17 @@ def get_all_movies(hub_id):
 
 
 @pny.db_session
-def init_hubs():
-    Hub(url='http://nnm-club.me/forum/viewforum.php?f=218', module='nnm_scraping', description='NNM: Зарубежные новинки DVDRip')
+def init_data():
+    global user
+    user = User(name='Test Uset', email='kest01@yandex.ru')
+
+    hub = Hub(url='http://nnm-club.me/forum/viewforum.php?f=218', module='nnm_scraping', description='NNM: Зарубежные новинки DVDRip')
     Hub(url='http://nnm-club.me/forum/viewforum.php?f=270', module='nnm_scraping', description='NNM: Отечественные новинки DVDRip')
     Hub(url='http://nnm-club.me/forum/viewforum.php?f=888', module='nnm_scraping', description='NNM: Новинки (3D)')
     Hub(url='http://nnm-club.me/forum/viewforum.php?f=954', module='nnm_scraping', description='NNM: Новинки (HD)')
     Hub(url='http://nnm-club.me/forum/viewforum.php?f=217', module='nnm_scraping', description='NNM: Экранки')
+
+    user.hubs.add(hub)
 
 
 @pny.db_session
@@ -115,11 +137,7 @@ def get_habs_and_new():
 
 if __name__ == "__main__":
     # @db_session
-    def add_hub():
-        pass
 
     clear_db_on_startup = True
 
     init_db()
-
-    add_hub()

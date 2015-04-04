@@ -22,7 +22,7 @@ class Home(rest.Resource):
 
 class Movies(rest.Resource):
     def get(self):
-        hub_id = request.args['hubid'] if 'hubid' in request.args else None
+        hub_id = int(request.args['hubid']) if 'hubid' in request.args else None
         movies = dao.get_all_movies(hub_id)
         return movies
 

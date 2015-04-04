@@ -19,10 +19,10 @@ Ext.define('TorrentWatchList.view.tabs.TabView', {
     },
 
 
-/*    listeners: {
+    listeners: {
         scope: 'controller',
         tabchange: 'onTabChange'
-    },*/
+    },
 
     initComponent: function() {
         this.callParent(arguments);

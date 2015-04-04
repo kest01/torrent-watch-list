@@ -18,10 +18,10 @@ def movie_sc_to_db(m, hub_id):
 
     db_movie = Movie(description=m.description, full_name=m.full_name, name_rus=m.name_rus, found_date=m.found_date)
     copy_attr(m, db_movie, ('name_eng', 'actors', 'genre', 'imdb_id', 'kinopoisk_id', 'poster_url', 'year', 'imdb_rating', 'kinopoisk_rating'))
+    db_torrent = torrent_sc_to_db(m.torrent, hub_id)
+    db_movie.torrents.add(db_torrent)
 
-    db_movie.torrents.add(torrent_sc_to_db(m.torrent, hub_id))
-
-    return db_movie
+    return db_movie, db_torrent
 
 
 
