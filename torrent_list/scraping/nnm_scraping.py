@@ -13,7 +13,7 @@ cookies = {}
 LOGIN_URL = 'http://nnm-club.me/forum/login.php'
 ENCODING = 'windows-1251'
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.DEBUG)
 
 def scrap(url):
     content = get_html_content(url)
@@ -36,6 +36,7 @@ def get_hub_links(url):
 def get_html_content(url):
     if not cookies:
         login()
+    logging.info("Getting content of url %s" % url)
     response = requests.get(url, cookies=cookies)
 
     return response.content.decode(ENCODING)
@@ -199,8 +200,9 @@ def parse_title(title):
 
     year = full_name = ''
 
-    p = re.compile("\(\d{4}\)")
-    matches = p.findall(title)
+    matches = re.findall("\(\d{4}\)", title)
+    if not matches:
+        matches = re.findall("\(\s?\d{4}\s?\)", title)
     for m in matches:
         token = int(m[1 : -1])
         if (token > 1900) and (token < date.today().year + 1):
@@ -230,7 +232,7 @@ def print_movie(movie):
 if __name__ == "__main__":
 
 
-    URL = 'http://nnm-club.me/forum/viewtopic.php?t=877961'
+    URL = 'http://nnm-club.me/forum/viewtopic.php?t=879364'
     # URL = 'http://nnm-club.me/forum/viewtopic.php?t=852125'
     # URL = 'http://nnm-club.me/forum/viewtopic.php?t=882872'
 
