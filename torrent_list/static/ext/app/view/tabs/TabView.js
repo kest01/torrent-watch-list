@@ -6,7 +6,8 @@ Ext.define('TorrentWatchList.view.tabs.TabView', {
     xtype: 'main-tabs',
     controller: 'tab-view',
     requires: [
-        'TorrentWatchList.view.tabs.TableView'
+        'TorrentWatchList.view.tabs.GridView',
+        'TorrentWatchList.view.test.TestGrid'
     ],
 
 /*
@@ -15,9 +16,13 @@ Ext.define('TorrentWatchList.view.tabs.TabView', {
 */
     defaults: {
         bodyPadding: 5,
-        scrollable: true
+//        scrollable: true
+        layout: 'fit'
     },
 
+    layout: {
+        type: 'fit'
+    },
 
     listeners: {
         scope: 'controller',
@@ -48,11 +53,8 @@ Ext.define('TorrentWatchList.view.tabs.TabView', {
                     tabs.add({
                         title: hub.description + s,
                         items: [{
-                            xtype: 'container',
-                            items: [{
-                                xtype: 'torrent-table-view',
-                                hub_id: hub.id
-                            }]
+                            xtype: 'torrent-table-view',
+                            hub_id: hub.id
                         }]
                     });
                 };
@@ -61,11 +63,9 @@ Ext.define('TorrentWatchList.view.tabs.TabView', {
                         tabs.add({
                             title: 'Все хабы',
                             items: [ {
-                                xtype: 'container',
-                                items: [{
-                                    xtype: 'torrent-table-view',
-                                    hub_id: 0
-                                }]
+                                xtype: 'torrent-table-view',
+                                //xtype: 'test-grid',
+                                hub_id: 0
                             }]
                         });
                     }

@@ -12,7 +12,7 @@ var movieStore;
 
 
 
-Ext.define('TorrentWatchList.view.tabs.TableView', {
+Ext.define('TorrentWatchList.view.tabs.GridView', {
     extend: 'Ext.grid.Panel',
     requires: [
         'TorrentWatchList.store.MovieStore',
@@ -23,7 +23,13 @@ Ext.define('TorrentWatchList.view.tabs.TableView', {
     store: 'TorrentWatchList.store.MovieStore',
     collapsible: false,
     //width: '99%',
-    //layout: 'fit',
+    defaults: {
+        layout: 'fit'
+    },
+
+    layout: {
+        type: 'fit'
+    },
 
     viewConfig: {
         stripeRows: true,
@@ -153,9 +159,9 @@ Ext.define('TorrentWatchList.view.tabs.TableView', {
             dataIndex: 'rating',
             renderer: function(val, meta, record) {
                 if (record.raw.imdbId){
-                    return '<a href="http://www.imdb.com/title/' + record.raw.imdbId + '/" target="_blank" rel="nofollow"><img src="http://imdb.snick.ru/ratefor/02/' + record.raw.imdbId +  '.png"/></a>';
+                    return val+'<br><a href="http://www.imdb.com/title/' + record.raw.imdbId + '/" target="_blank" rel="nofollow"><img src="http://imdb.snick.ru/ratefor/02/' + record.raw.imdbId +  '.png"/></a>';
                 } else if (record.raw.kinopoiskId) {
-                    return '<a href="http://www.kinopoisk.ru/film/' + record.raw.kinopoiskId + '/" target="_blank" rel="nofollow"><img src="http://www.kinopoisk.ru/rating/' + record.raw.kinopoiskId + '.gif"/></a>';
+                    return val+'<br><a href="http://www.kinopoisk.ru/film/' + record.raw.kinopoiskId + '/" target="_blank" rel="nofollow"><img src="http://www.kinopoisk.ru/rating/' + record.raw.kinopoiskId + '.gif"/></a>';
                 }
                 return ''
             }

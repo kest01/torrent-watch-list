@@ -11,7 +11,9 @@ Ext.define('TorrentWatchList.Application', {
     name: 'TorrentWatchList',
 
     stores: [
-        'TorrentWatchList.store.MovieStore'
+        'TorrentWatchList.store.MovieStore',
+        'TorrentWatchList.view.test.TestStore'
+
     ],
     
     launch: function () {
