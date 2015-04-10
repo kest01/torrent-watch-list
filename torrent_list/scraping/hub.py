@@ -51,22 +51,22 @@ def scrap_hubs():
 
 
 def fill_ratings(movie):
-    if movie.kinopoisk_id:
-        movie.kinopoisk_rating, movie.imdb_rating = get_kinopoisk_rating(movie.kinopoisk_id)
-        pass
-    elif movie.imdb_id:
-        movie.kinopoisk_rating, movie.imdb_rating = None, get_imdb_rating(movie.imdb_id)
+    if movie.imdb_id:
+        movie.imdb_rating = get_imdb_rating(movie.imdb_id)
+        movie.kinopoisk_rating = None
+    elif movie.kinopoisk_id:
+        movie.kinopoisk_rating = get_kinopoisk_rating(movie.kinopoisk_id)
+        movie.imdb_rating = None
     else:
         movie.kinopoisk_rating = movie.imdb_rating = None
 
 def get_kinopoisk_rating(kp_id):
     response = requests.get("http://rating.kinopoisk.ru/%s.xml" % kp_id)
     tree = ET.fromstring(response.content)
-    kinopoisk_rating = tree.find("kp_rating").text
-    imdb_element = tree.find("imdb_rating")
-    imdb_rating = imdb_element.text if imdb_element is not None else None
-
-    return kinopoisk_rating, imdb_rating
+    return tree.find("kp_rating").text
+    # imdb_element = tree.find("imdb_rating")
+    # imdb_rating = imdb_element.text if imdb_element is not None else None
+    # return kinopoisk_rating, imdb_rating
 
 
 def get_imdb_rating(imdb_id):
