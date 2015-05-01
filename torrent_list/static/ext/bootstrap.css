@@ -45,7 +45,7 @@
     cursor: auto;
 }
 
-.x-action-col-cell img.skipped-false {
+.x-action-col-cell img.to-remove-false {
     background-image: url(resources/unchecked_checkbox-32.png);
     background-size: contain;
     height: 30px;
@@ -53,7 +53,7 @@
     cursor: pointer;
 }
 
-.x-action-col-cell img.skipped-true {
+.x-action-col-cell img.to-remove-true {
     background-image: url(resources/cancel-32.png);
     background-size: contain;
     height: 30px;
@@ -85,4 +85,8 @@
 
     box-shadow: #C7D3E0 0 1px 0px 0 inset, #C7D3E0 0 -1px 0px 0 inset, #C7D3E0 -1px 0 0px 0 inset, #C7D3E0 1px 0 0px 0 inset;
 
+}
+
+.x-tab-bar-default {
+    background-color: #f5f5f5;
 }

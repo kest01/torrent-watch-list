@@ -9,7 +9,7 @@ Ext.define('TorrentWatchList.view.tabs.TabView', {
         'TorrentWatchList.view.tabs.GridView',
         'TorrentWatchList.view.test.TestGrid'
     ],
-
+    id: 'tab-view',
 /*
     width: 400,
     height: 300,
@@ -27,6 +27,55 @@ Ext.define('TorrentWatchList.view.tabs.TabView', {
     listeners: {
         scope: 'controller',
         tabchange: 'onTabChange'
+    },
+    tabBar: {
+        items: [{
+            xtype: 'tbfill'
+        }, {
+            xtype: 'button',
+            id: 'remove-button',
+            disabled: true,
+//            padding: '5 5 5 5',
+            text: 'Удалить отмеченное',
+            handler: function() {
+                //alert('You clicked the button!');
+                var grid = this.up('#tab-view').getActiveTab().items.getAt(0);
+                var store = grid.getStore();
+                var idsToRemove = [];
+                store.each(function(record){
+                    if (record.get('toRemove') != null) {
+                        if (record.get('toRemove')) {
+                            idsToRemove.push(record.get('id'));
+                        }
+                    } else if (record.get('isReadyToDel')) {
+                        idsToRemove.push(record.get('id'));
+                    }
+                });
+                if (idsToRemove.length > 0) {
+                    Ext.Ajax.request({
+                        url: '/remove/',
+                        method: 'POST',
+                        //params: {arr: idsToRemove},
+                        jsonData: idsToRemove,
+                        success: function() {
+                            store.load();
+//                            grid.getView().refresh();
+                            console.log('Grid reloaded after update');
+                        },
+                        failure: function(response) {
+                            Ext.MessageBox.show({
+                                title: response.status + ' ' + response.statusText,
+                                msg: response.responseText,
+                                buttons: Ext.MessageBox.OK,
+                                icon: Ext.MessageBox.ERROR
+                            });
+                        }
+                    });
+                }
+                console.log(idsToRemove);
+
+            }
+        }]
     },
 
     initComponent: function() {
@@ -81,7 +130,5 @@ Ext.define('TorrentWatchList.view.tabs.TabView', {
                 showError(conn.responseText);
             }
         });
-
-
     }
 });

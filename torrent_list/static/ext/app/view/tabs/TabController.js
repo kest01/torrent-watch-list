@@ -12,8 +12,22 @@ Ext.define('TorrentWatchList.view.tabs.TabController', {
         var store = grid.store
 
         store.load({ params: { hubid: grid.hub_id} });
+        store.on("load", function() {
+
+            var button = Ext.ComponentQuery.query('#remove-button')[0];
+            for (var i = 0; i < store.data.items.length; i++) {
+                var row = store.data.items[i].data;
+                console.log();
+                if (row['isReadyToDel']) {
+                    button.setDisabled(false);
+                    return;
+                }
+            }
+            button.setDisabled(true);
+        });
         grid.getView().refresh();
 
         Ext.resumeLayouts(true);
     }
+
 });

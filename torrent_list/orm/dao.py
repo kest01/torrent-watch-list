@@ -120,20 +120,26 @@ def get_all_movies(hub_id):
 
 
 @pny.db_session
+def remove_movies_from_user(movies_list):
+    user = get_current_user()
+    user.torrents.remove()
+
+
+@pny.db_session
 def init_data():
     user = User(name='Test Uset', email='kest01@yandex.ru')
 
-    hub = Hub(url='http://nnm-club.me/forum/viewforum.php?f=218', module='nnm_scraping', description='NNM: Зарубежные новинки DVDRip')
-    hub2 = Hub(url='http://nnm-club.me/forum/viewforum.php?f=270', module='nnm_scraping', description='NNM: Отечественные новинки DVDRip')
-    hub3 = Hub(url='http://nnm-club.me/forum/viewforum.php?f=888', module='nnm_scraping', description='NNM: Новинки (3D)')
-    hub4 = Hub(url='http://nnm-club.me/forum/viewforum.php?f=954', module='nnm_scraping', description='NNM: Новинки (HD)')
-    hub5 = Hub(url='http://nnm-club.me/forum/viewforum.php?f=217', module='nnm_scraping', description='NNM: Экранки')
+    hub = Hub(url='https://nnm-club.me/forum/viewforum.php?f=218', module='nnm_scraping', description='NNM: Зарубежные новинки DVDRip')
+    # hub2 = Hub(url='http://nnm-club.me/forum/viewforum.php?f=270', module='nnm_scraping', description='NNM: Отечественные новинки DVDRip')
+    hub3 = Hub(url='https://nnm-club.me/forum/viewforum.php?f=888', module='nnm_scraping', description='NNM: Новинки (3D)')
+    # hub4 = Hub(url='http://nnm-club.me/forum/viewforum.php?f=954', module='nnm_scraping', description='NNM: Новинки (HD)')
+    # hub5 = Hub(url='http://nnm-club.me/forum/viewforum.php?f=217', module='nnm_scraping', description='NNM: Экранки')
 
     user.hubs.add(hub)
-    user.hubs.add(hub2)
+    # user.hubs.add(hub2)
     user.hubs.add(hub3)
-    user.hubs.add(hub4)
-    user.hubs.add(hub5)
+    # user.hubs.add(hub4)
+    # user.hubs.add(hub5)
 
 
 @pny.db_session

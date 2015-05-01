@@ -37,7 +37,7 @@ Ext.define('TorrentWatchList.model.Movie', {
             }
             return result;
         }},
-        {name: 'skipped', type: 'boolean', persist: false, defaultValue: null, allowNull:true},
+        {name: 'toRemove', type: 'boolean', persist: false, defaultValue: null, allowNull:true},
         {name: 'favorites', type: 'boolean'},
         {name: 'posterUrl', type: 'string'},
         {name: 'translation', type: 'string'}

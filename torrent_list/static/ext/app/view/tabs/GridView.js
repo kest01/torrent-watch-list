@@ -47,8 +47,8 @@ Ext.define('TorrentWatchList.view.tabs.GridView', {
                 var store = grid.getStore();
                 var idsToSkip = [];
                 store.each(function(record){
-                    if (record.get('skipped') != null) {
-                        if (record.get('skipped')) {
+                    if (record.get('toRemove') != null) {
+                        if (record.get('toRemove')) {
                             idsToSkip.push(record.get('id'));
                         }
                     } else if (record.get('isReadyToDel')) {
@@ -287,32 +287,32 @@ Ext.define('TorrentWatchList.view.tabs.GridView', {
             menuDisabled: true,
             tdCls: "vertical-align-class",
             items: [{
-                tooltip: 'Mark for deletion',
+                tooltip: 'Поменить для удаления',
                 scope: this,
                 handler: function(grid, rowIndex, colIndex, item, event, record) {
-                    if (record.get('skipped') != null) {
-                        if (record.get('skipped')) {
-                            record.set('skipped', false);
+                    if (record.get('toRemove') != null) {
+                        if (record.get('toRemove')) {
+                            record.set('toRemove', false);
                         } else{
-                            record.set('skipped', true);
+                            record.set('toRemove', true);
                         }
                     } else if (record.get('isReadyToDel')) {
-                        record.set('skipped', false);
+                        record.set('toRemove', false);
                     } else{
-                        record.set('skipped', true);
+                        record.set('toRemove', true);
                     }
                 },
                 getClass: function(v, metadata, r) {
-                    if (r.get('skipped') != null) {
-                        if (r.get('skipped')) {
-                            return 'skipped-true';
+                    if (r.get('toRemove') != null) {
+                        if (r.get('toRemove')) {
+                            return 'to-remove-true';
                         } else{
-                            return 'skipped-false';
+                            return 'to-remove-false';
                         }
                     } else if (r.get('isReadyToDel')) {
-                        return 'skipped-true';
+                        return 'to-remove-true';
                     } else{
-                        return 'skipped-false';
+                        return 'to-remove-false';
                     }
                 }
             }]

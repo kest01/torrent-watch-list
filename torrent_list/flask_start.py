@@ -27,19 +27,24 @@ class Movies(rest.Resource):
         return movies
 
 
-class MovieItem(rest.Resource):
-    def post(self, movie_id):
-        pass
-
-
 class Hubs(rest.Resource):
     def get(self):
         return dao.get_habs_and_new()
 
 
+class RemoveMovies(rest.Resource):
+    def post(self):
+        toRemove = request.json
+        # if toRemove and len(toRemove) > 0:
+        #     dao.
+        logging.info("toRemove list: %s", toRemove)
+        pass
+
+
 api.add_resource(Home, '/')
 api.add_resource(Movies, '/movies/')
-api.add_resource(MovieItem, '/movies/<int:movie_id>')
+# api.add_resource(MovieItem, '/movies/<int:movie_id>')
+api.add_resource(RemoveMovies, '/remove/')
 api.add_resource(Hubs, '/hubs/')
 
 if __name__ == '__main__':
