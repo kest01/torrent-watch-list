@@ -41,22 +41,39 @@ Ext.define('TorrentWatchList.view.tabs.TabView', {
                 //alert('You clicked the button!');
                 var grid = this.up('#tab-view').getActiveTab().items.getAt(0);
                 var store = grid.getStore();
-                var idsToRemove = [];
+                var  itemsToRemove = [];
+                var addItem = function (record) {
+                    var id = record.get('id');
+                    var hubIds = []
+                    if (grid.hub_id == 0) {
+                        record.torrents().data.each(function(item) {
+                            var hub = item.data['hubId'];
+                            if (hubIds.indexOf(hub) == -1)
+                                hubIds.push(hub)
+                        });
+                    } else {
+                        hubIds.push(grid.hub_id)
+                    }
+                    return {
+                        id: id,
+                        hubIds: hubIds
+                    }
+                };
                 store.each(function(record){
                     if (record.get('toRemove') != null) {
                         if (record.get('toRemove')) {
-                            idsToRemove.push(record.get('id'));
+                            itemsToRemove.push(addItem(record));
                         }
                     } else if (record.get('isReadyToDel')) {
-                        idsToRemove.push(record.get('id'));
+                        itemsToRemove.push(addItem(record));
                     }
                 });
-                if (idsToRemove.length > 0) {
+                if (itemsToRemove.length > 0) {
                     Ext.Ajax.request({
                         url: '/remove/',
                         method: 'POST',
                         //params: {arr: idsToRemove},
-                        jsonData: idsToRemove,
+                        jsonData: itemsToRemove,
                         success: function() {
                             store.load();
 //                            grid.getView().refresh();
@@ -72,7 +89,7 @@ Ext.define('TorrentWatchList.view.tabs.TabView', {
                         }
                     });
                 }
-                console.log(idsToRemove);
+                console.log(itemsToRemove);
 
             }
         }]

@@ -121,7 +121,7 @@ Ext.define('TorrentWatchList.view.tabs.GridView', {
 
                 var hubArr = []
                 record.torrents().data.each(function(item, index, totalItems) {
-                    hub = item.data['hub'];
+                    var hub = item.data['hub'];
                     if (hubArr.indexOf(hub) == -1)
                         hubArr.push(hub)
                 });
@@ -130,14 +130,16 @@ Ext.define('TorrentWatchList.view.tabs.GridView', {
                     if (!hubs) hubs = hub;
                     else hubs += ', ' + hub;
                 });
-
-                return '<b>Хабы</b>: ' + hubs
-                    + '<br/><b>Название</b>: ' + val
+                var result = '';
+                if (this.hub_id == 0) result = '<b>Хабы</b>: ' + hubs + '<br/>';
+                result += '<b>Название</b>: ' + val
                     + "<br/><b>Год выпуска</b>: " + record.raw.year
                     + "<br/><b>Жанр</b>: " + record.raw.genre
                     + "<br/><b>Перевод</b>: " + record.raw.translation
                     + "<br/><b>Описание</b>: " + record.raw.description
                     + "<br/><b>Актеры</b>: " + record.raw.actors;
+
+                return result;
             }
         }, {
             text: 'S',
@@ -287,7 +289,7 @@ Ext.define('TorrentWatchList.view.tabs.GridView', {
             menuDisabled: true,
             tdCls: "vertical-align-class",
             items: [{
-                tooltip: 'Поменить для удаления',
+                tooltip: 'Пометить для удаления',
                 scope: this,
                 handler: function(grid, rowIndex, colIndex, item, event, record) {
                     if (record.get('toRemove') != null) {
@@ -301,6 +303,7 @@ Ext.define('TorrentWatchList.view.tabs.GridView', {
                     } else{
                         record.set('toRemove', true);
                     }
+                    checkDelButtonState(record.store);
                 },
                 getClass: function(v, metadata, r) {
                     if (r.get('toRemove') != null) {

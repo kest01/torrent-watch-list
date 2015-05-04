@@ -8,6 +8,7 @@ Ext.define('TorrentWatchList.model.TorrentsList', {
         {name: 'seeders', type: 'string'},
         {name: 'leechers', type: 'string'},
         {name: 'torrentUrl', type: 'string'},
+        {name: 'hubId', type: 'int'},
         {name: 'hub', type: 'string'}
     ]
 });

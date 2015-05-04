@@ -19,7 +19,8 @@ class User(db.Entity):
     name = pny.Required(str)
     email = pny.Required(str)
     hubs = pny.Set('Hub')
-    torrents = pny.Set('Torrent', lazy=True)
+    removed_movies = pny.Set('RemovedMovies', lazy=True)
+    # movies = pny.Set('Movie', lazy=True)
 
 
 class Hub(db.Entity):
@@ -28,6 +29,7 @@ class Hub(db.Entity):
     description = pny.Optional(str)
     torrents = pny.Set('Torrent')
     users = pny.Set(User)
+    removed_movies = pny.Set('RemovedMovies', lazy=True)
 
 
 class Movie(db.Entity):
@@ -45,6 +47,7 @@ class Movie(db.Entity):
     poster_url = pny.Optional(str)
     year = pny.Optional(str)
     torrents = pny.Set('Torrent')
+    removed_movies = pny.Set('RemovedMovies', lazy=True)
 
 
 class Torrent(db.Entity):
@@ -52,13 +55,20 @@ class Torrent(db.Entity):
     title = pny.Required(str)
     torrent_url = pny.Required(str, unique=True)
     url = pny.Required(str, unique=True)
-    hub = pny.Required('Hub')
+    hub = pny.Required(Hub)
     movie = pny.Optional(lambda: Movie)
     size = pny.Optional(str)
     seeders = pny.Optional(int)
     leechers = pny.Optional(int)
     translation = pny.Optional(str)
-    users = pny.Set(User)
+    # users = pny.Set(User)
+
+
+class RemovedMovies(db.Entity):
+    movie = pny.Required(Movie)
+    hub = pny.Required(Hub)
+    user = pny.Required(User)
+    pny.PrimaryKey(movie, hub, user)
 
 
 def init_db():
@@ -79,6 +89,11 @@ def get_current_user():
     return User[1]
 
 
+def get_current_user_id():
+    # FIXME Mock implementation
+    return 1
+
+
 @pny.db_session
 def save_movie(hub_id, movie):
     query = "SELECT * FROM Movie WHERE full_name = $movie.full_name"
@@ -93,12 +108,14 @@ def save_movie(hub_id, movie):
         db_movie.torrents.add(db_torrent)
     else:
         db_movie, db_torrent = transform.movie_sc_to_db(movie, hub_id)
-    add_torrent_to_user(db_torrent)
+        # add_movie_to_all_users(db_movie)
 
 
-def add_torrent_to_user(db_torrent):
-    for u in pny.select(u for u in User for hub in u.hubs if db_torrent.hub == hub):
-        u.torrents.add(db_torrent)
+# def add_movie_to_all_users(movie_id, hub_id):
+#     # for u in pny.selects(u for u in User for hub in u.hubs if db_torrent.hub == hub):
+#     #     u.torrents.add(db_torrent)
+#     for u in pny.selects(u for u in User for hub in u.hubs if hub == hub_id):
+#         UserMoviesHub(user=u, hub=hub_id, movie=movie_id)
 
 
 @pny.db_session
@@ -112,26 +129,38 @@ def filter_exist_torrents(url_list):
 def get_all_movies(hub_id):
     user = get_current_user()
     if hub_id:
-        movies = pny.select(m for m in Movie for t in m.torrents for u in t.users if t.hub.id == hub_id and u == user)
+        movies = pny.select(m for m in Movie
+                            for t in m.torrents
+                            if t.hub.id == hub_id and m not in user.removed_movies.movie)
     else:
-        movies = pny.select(m for m in Movie for t in m.torrents for u in t.users if u == user)
+        movies = pny.select(m for m in Movie
+                            if m not in user.removed_movies.movie)
 
     return transform.movies_db_to_json(movies)
 
+# class RemovedMovies(db.Entity):
+#     movie = pny.Required(Movie)
+#     hub = pny.Required(Hub)
+#     pny.PrimaryKey(movie, hub)
+#     user = pny.Required(User)
 
 @pny.db_session
-def remove_movies_from_user(movies_list):
-    user = get_current_user()
-    user.torrents.remove()
+def remove_movies_from_user(toRemove):
+    user = get_current_user_id()
+    for item in toRemove:
+        for hub_id in item['hubIds']:
+            RemovedMovies(movie=item['id'], hub=hub_id, user=user)
 
 
 @pny.db_session
 def init_data():
     user = User(name='Test Uset', email='kest01@yandex.ru')
 
-    hub = Hub(url='https://nnm-club.me/forum/viewforum.php?f=218', module='nnm_scraping', description='NNM: Зарубежные новинки DVDRip')
+    hub = Hub(url='https://nnm-club.me/forum/viewforum.php?f=218', module='nnm_scraping',
+              description='NNM: Зарубежные новинки DVDRip')
     # hub2 = Hub(url='http://nnm-club.me/forum/viewforum.php?f=270', module='nnm_scraping', description='NNM: Отечественные новинки DVDRip')
-    hub3 = Hub(url='https://nnm-club.me/forum/viewforum.php?f=888', module='nnm_scraping', description='NNM: Новинки (3D)')
+    hub3 = Hub(url='https://nnm-club.me/forum/viewforum.php?f=888', module='nnm_scraping',
+               description='NNM: Новинки (3D)')
     # hub4 = Hub(url='http://nnm-club.me/forum/viewforum.php?f=954', module='nnm_scraping', description='NNM: Новинки (HD)')
     # hub5 = Hub(url='http://nnm-club.me/forum/viewforum.php?f=217', module='nnm_scraping', description='NNM: Экранки')
 
@@ -147,8 +176,10 @@ def get_hubs():
     hubs = Hub.select()
     return hubs[:]
 
+
 def get_habs_and_new():
     return transform.hubs_db_to_json(get_hubs())
+
 
 if __name__ == "__main__":
     # @db_session

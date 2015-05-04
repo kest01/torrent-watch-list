@@ -82,7 +82,8 @@ def torrents_db_to_json(movie):
             'seeders': t.seeders,
             'leechers': t.leechers,
             'torrentUrl': t.torrent_url,
-            'hub': t.hub.description
+            'hub': t.hub.description,
+            'hubId': t.hub.id,
         }
         for t in movie.torrents
     ]

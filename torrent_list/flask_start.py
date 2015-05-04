@@ -35,10 +35,9 @@ class Hubs(rest.Resource):
 class RemoveMovies(rest.Resource):
     def post(self):
         toRemove = request.json
-        # if toRemove and len(toRemove) > 0:
-        #     dao.
-        logging.info("toRemove list: %s", toRemove)
-        pass
+        logging.debug("toRemove list: %s", toRemove)
+        if toRemove and len(toRemove) > 0:
+            dao.remove_movies_from_user(toRemove)
 
 
 api.add_resource(Home, '/')
